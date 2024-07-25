@@ -1,6 +1,6 @@
 # Projeto de ETL com Python, DuckDB e PostgreSQL
 
-![Workflow](./imgs/workflow.drawio.png)
+<img src="./mnt/data/workflow.drawio.png" alt="Workflow" width="600">
 
 ## Descrição do Projeto
 

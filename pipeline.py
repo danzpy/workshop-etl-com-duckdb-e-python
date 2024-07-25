@@ -6,6 +6,8 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
+load_dotenv()
+
 def baixar_arquivos(URL: Path, DIRETORIO: Path) -> None:
     """
     Faz o download dos arquivos que estão presentes na URL informada. A pasta deverá ser pública para que
@@ -45,13 +47,43 @@ def ler_csv(CAMINHO: Path) -> duckdb.DuckDBPyRelation:
     df = duckdb.read_csv(CAMINHO)
     return df
 
-ler_csv('./pasta_gdown/alunos_1.csv')
+def transformar(df: duckdb.DuckDBPyRelation) -> pd.DataFrame:
+    """
+    Recebe um duckdb.DuckDBPyRelation e retorna um pd.DataFrame com uma coluna "Status", de acordo
+    com a nota do Aluno.
 
+    Args:
+    df = duckdb.DuckDBPyRelatio
+    """
+
+    df_tratado = duckdb.sql("SELECT *, CASE WHEN NOTA > 60 THEN 'APROVADO' ELSE 'REPROVADO' END AS status FROM df").df()
+
+    return df_tratado
+
+def carregar_postgres(df: pd.DataFrame, tabela: str) -> None:
+    """
+    Recebe um pd.DataFrame e armazena seus dados na tabela informada.
+
+    Args:
+    df = pd.Dataframe
+    tabela = Tabela destino (postgres).
+    """
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    engine = create_engine(DATABASE_URL)
+
+    df.to_sql(tabela, con=engine, if_exists='append', index=False)
+    
+    print(f'Dados inseridos na {tabela} com sucesso.')
 
 if __name__ == '__main__':
-    URL_PASTA: Path = 'https://drive.google.com/drive/folders/1EZ6NMPSFaawuW6kzM_GBu-DHMx5JR_vw?usp=drive_link'
+    URL_PASTA: Path = os.getenv("URL_PASTA")
     DIRETORIO_LOCAL: Path = './pasta_gdown'
-
-    #listando_arquivos(DIRETORIO_LOCAL)
-    
     #baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
+    lista_arquivos = listando_arquivos(DIRETORIO_LOCAL)
+    for arquivo in lista_arquivos:
+        duckdb_df = ler_csv(arquivo)
+        pandas_df = transformar(duckdb_df)
+        carregar_postgres(pandas_df, 'status_alunos')
+
+    
+    

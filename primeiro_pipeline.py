@@ -18,12 +18,12 @@ def baixar_arquivos(URL: Path, DIRETORIO: Path) -> None:
     URL = Caminho da pasta (Google Drive).
     DIRETORIO = Diretório onde serão armazenados os arquivos após o download.
     """
-    os.makedirs(DIRETORIO_LOCAL, exist_ok=True)
-    gdown.download_folder(URL_PASTA, output=DIRETORIO_LOCAL, quiet=False, use_cookies=False)
+    os.makedirs(DIRETORIO, exist_ok=True)
+    gdown.download_folder(URL, output=DIRETORIO, quiet=False, use_cookies=False)
 
 def listando_arquivos(DIRETORIO) -> list:
     """
-    Verifica quais são os arquivos do tipo "csv" presentes no diretório especificado e registra seu
+    Verifica quais são os arquivos do tipo "csv", "parquet" ou "json" presentes no diretório especificado e registra seu
     diretório completo em uma lista.
 
     Args:
@@ -34,7 +34,10 @@ def listando_arquivos(DIRETORIO) -> list:
     for arquivo in os.listdir(DIRETORIO):
         if arquivo.endswith('.csv'):
             arquivos.append(f'{DIRETORIO}/{arquivo}')
-
+        elif arquivo.endswith('.parquet'):
+            arquivos.append(f'{DIRETORIO}/{arquivo}')
+        elif arquivo.endswith('.json'):
+            arquivos.append(f'{DIRETORIO}/{arquivo}')
     return arquivos
 
 def ler_csv(CAMINHO: Path) -> duckdb.DuckDBPyRelation:

@@ -32,6 +32,22 @@ def registrar_arquivo(con: duckdb.DuckDBPyConnection, arquivo: str) -> None:
         VALUES (?, ?)
     """, (arquivo, datetime.now()))
 
+def ler_arquivos(arquivo: Path) -> pd.DataFrame:
+    """
+    Verifica a extensão do arquivo presente no caminho informado e retorna um pd.DataFrame.
+
+    Args:
+    CAMINHO: Caminho/arquivo que originará o DataFrame.
+    """
+    
+    if arquivo.endswith('.csv'):
+        df = pd.read_csv(arquivo)
+    elif arquivo.endswith('.parquet'):
+        df = pd.read_parquet(arquivo)
+    elif arquivo.endswith('.json'):
+        df = pd.read_json(arquivo, orient='records', lines=True)
+
+    return df
 
 if __name__ == '__main__':
     URL_PASTA: Path = os.getenv("URL_PASTA")
@@ -44,7 +60,7 @@ if __name__ == '__main__':
         nome_arquivo = os.path.basename(arquivo)
         check = con.sql(f"SELECT arquivo FROM historico_arquivos WHERE arquivo = '{nome_arquivo}'").df()
         if check.empty:
-            duckdb_df = pp.ler_csv(arquivo)
+            duckdb_df = ler_arquivos(arquivo)
             pandas_df = pp.transformar(duckdb_df)
             pp.carregar_postgres(pandas_df, 'status_alunos')
             registrar_arquivo(con, nome_arquivo)

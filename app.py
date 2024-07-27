@@ -1,3 +1,9 @@
 import streamlit as st
+from pipeline_aprimorado import pipeline
 
-st.write('Testando o streamlit')
+if st.button('Processar'):
+    with st.spinner('Processando...'):
+        logs = pipeline()
+
+        for log in logs:
+            st.write(log)

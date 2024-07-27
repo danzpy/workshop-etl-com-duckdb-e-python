@@ -2,7 +2,7 @@ import os
 import gdown
 import duckdb
 import pandas as pd
-import primeiro_pipeline as pp
+import pipeline as pp
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 from pathlib import Path
@@ -57,27 +57,48 @@ def ler_arquivos(arquivo: Path) -> pd.DataFrame:
 
     return df
 
-def pipeline() -> None:
+def pipeline() -> list:
     """
     Executa toda a ETL do projeto.
     """
+    logs = []
 
     URL_PASTA: Path = os.getenv("URL_PASTA")
     DIRETORIO_LOCAL: Path = './pasta_gdown'
-    pp.baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
+    
+    try:
+        logs.append(f"Baixando arquivos do Google Drive para o diretório {DIRETORIO_LOCAL}.")
+        pp.baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
+    except Exception as e:
+        logs.append(f'Não foi possível se conectar ao GoogleDrive.')
+        return logs
+
     con = conectar_banco()
     inicializar_tabela(con)
+    
+    logs.append(f"Verificando arquivos que foram baixados no diretório {DIRETORIO_LOCAL}.")
     lista_arquivos = pp.listando_arquivos(DIRETORIO_LOCAL)
+    
     for arquivo in lista_arquivos:
         nome_arquivo = os.path.basename(arquivo)
+        logs.append(f"Processando arquivo: {nome_arquivo}")
+        
         check = con.sql(f"SELECT arquivo FROM historico_arquivos WHERE arquivo = '{nome_arquivo}'").df()
-        if check.empty:
+        if check.empty:          
             duckdb_df = ler_arquivos(arquivo)
             pandas_df = pp.transformar(duckdb_df)
+            
+            logs.append(f"Inserindo arquivo {nome_arquivo} no Postgres: ")
             pp.carregar_postgres(pandas_df, 'status_alunos')
+            
             registrar_arquivo(con, nome_arquivo)
         else:
-            print(f'Arquivo {nome_arquivo} já processado anteriormente.')
+            log_msg = f'Arquivo {nome_arquivo} já foi processado anteriormente.'
+            logs.append(log_msg)
+            print(log_msg)
+    
+    logs.append("Processo de ETL completo.")
+    return logs
 
 if __name__ == '__main__':
     pipeline()

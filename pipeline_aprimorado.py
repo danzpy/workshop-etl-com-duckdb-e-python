@@ -65,7 +65,6 @@ def pipeline() -> list:
 
     URL_PASTA: Path = os.getenv("URL_PASTA")
     DIRETORIO_LOCAL: Path = './pasta_gdown'
-    DATABASE_URL = os.getenv("DATABASE_URL")
     
     try:
         logs.append(f"Baixando arquivos do Google Drive para o diretório {DIRETORIO_LOCAL}.")

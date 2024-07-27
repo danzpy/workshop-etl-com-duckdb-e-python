@@ -79,6 +79,9 @@ docs/_build/
 .pybuilder/
 target/
 
+# Duckdb
+duckdb.db
+
 # Jupyter Notebook
 .ipynb_checkpoints
 

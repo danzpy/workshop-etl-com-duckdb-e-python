@@ -14,10 +14,15 @@ from datetime import datetime
 load_dotenv()
 
 def conectar_banco() -> None:
-    """Conecta ao banco de dados DuckDB; cria o banco se não existir."""
+    """
+    Conecta ao banco de dados DuckDB; cria o banco se não existir.
+    """
     return duckdb.connect(database='duckdb.db', read_only=False)
 
 def inicializar_tabela(con: duckdb.DuckDBPyConnection) -> None:
+    """
+    Cria a tabela historico_arquivos, caso não exista.
+    """
     con.execute("""
         CREATE TABLE IF NOT EXISTS historico_arquivos(
                 arquivo VARCHAR(30),
@@ -27,6 +32,9 @@ def inicializar_tabela(con: duckdb.DuckDBPyConnection) -> None:
 
 
 def registrar_arquivo(con: duckdb.DuckDBPyConnection, arquivo: str) -> None:
+    """
+    Insere os arquivos que serão processados na tabela historico_arquivos
+    """
     con.execute("""
         INSERT INTO historico_arquivos (arquivo, dt_processamento)
         VALUES (?, ?)
@@ -49,10 +57,14 @@ def ler_arquivos(arquivo: Path) -> pd.DataFrame:
 
     return df
 
-if __name__ == '__main__':
+def pipeline() -> None:
+    """
+    Executa toda a ETL do projeto.
+    """
+
     URL_PASTA: Path = os.getenv("URL_PASTA")
     DIRETORIO_LOCAL: Path = './pasta_gdown'
-    #pp.baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
+    pp.baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
     con = conectar_banco()
     inicializar_tabela(con)
     lista_arquivos = pp.listando_arquivos(DIRETORIO_LOCAL)
@@ -66,4 +78,7 @@ if __name__ == '__main__':
             registrar_arquivo(con, nome_arquivo)
         else:
             print(f'Arquivo {nome_arquivo} já processado anteriormente.')
+
+if __name__ == '__main__':
+    pipeline()
 

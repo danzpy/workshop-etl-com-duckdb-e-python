@@ -78,15 +78,17 @@ def carregar_postgres(df: pd.DataFrame, tabela: str) -> None:
     
     print(f'Dados inseridos na {tabela} com sucesso.')
 
-if __name__ == '__main__':
+def pipeline() -> None:
     URL_PASTA: Path = os.getenv("URL_PASTA")
     DIRETORIO_LOCAL: Path = './pasta_gdown'
-    #baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
+    baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
     lista_arquivos = listando_arquivos(DIRETORIO_LOCAL)
     for arquivo in lista_arquivos:
         duckdb_df = ler_csv(arquivo)
         pandas_df = transformar(duckdb_df)
         carregar_postgres(pandas_df, 'status_alunos')
 
+if __name__ == '__main__':
+    pipeline()
     
     

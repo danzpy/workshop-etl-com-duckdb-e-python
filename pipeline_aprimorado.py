@@ -66,18 +66,21 @@ def pipeline() -> list:
     URL_PASTA: Path = os.getenv("URL_PASTA")
     DIRETORIO_LOCAL: Path = './pasta_gdown'
     
-    try:
-        logs.append(f"Baixando arquivos do Google Drive para o diretório {DIRETORIO_LOCAL}.")
-        pp.baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
-    except Exception as e:
-        logs.append(f'Não foi possível se conectar ao GoogleDrive: {str(e)}')
-        return logs
+    # try:
+    #     logs.append(f"Baixando arquivos do Google Drive para o diretório {DIRETORIO_LOCAL}.")
+    #     pp.baixar_arquivos(URL_PASTA, DIRETORIO_LOCAL)
+    # except Exception as e:
+    #     logs.append(f'Não foi possível se conectar ao GoogleDrive: {str(e)}')
+    #     return logs
 
     con = conectar_banco()
     inicializar_tabela(con)
+
+    logs.append(f'{con.sql("SELECT * FROM historico_arquivos")}')
     
     logs.append(f"Verificando arquivos que foram baixados no diretório {DIRETORIO_LOCAL}.")
     lista_arquivos = pp.listando_arquivos(DIRETORIO_LOCAL)
+    logs.append(lista_arquivos)
     
     for arquivo in lista_arquivos:
         nome_arquivo = os.path.basename(arquivo)

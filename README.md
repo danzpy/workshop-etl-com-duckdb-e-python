@@ -11,3 +11,7 @@ Este projeto tem como objetivo criar um fluxo de trabalho para baixar, processar
 3. **Ler arquivos CSV**: Utiliza o DuckDB para ler os arquivos CSV e criar dataframes.
 4. **Transformar dados**: Realiza transformações nos dados, como a criação de uma coluna "Status" que indica se o aluno está "APROVADO" ou "REPROVADO" com base em sua nota.
 5. **Carregar dados no PostgreSQL**: Utiliza o SQLAlchemy para carregar os dados transformados em uma tabela PostgreSQL.
+
+## Melhorias futuras
+
+1. Após um determinado período a tabela "historico_arquivos" é apagada do Web Service. Se já foi realizada uma carga anteriormente, os dados que já foram submetidos serão carregados novamente, duplicando os dados. **Identificar e corrigir esse problema.**
